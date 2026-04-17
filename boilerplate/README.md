@@ -32,7 +32,8 @@ The goal is to understand how containers work internally by building a simplifie
 
 ##  How It Works
 
-### 1. Container Creation
+### 1. BEFORE 
+Container Creation
 
 * Uses `clone()` to create a new process
 * Applies namespace isolation:
