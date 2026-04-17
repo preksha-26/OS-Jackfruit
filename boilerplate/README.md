@@ -105,6 +105,8 @@ sudo ./engine start alpha ../rootfs-alpha /bin/sh
 ### 🔹 Container List
 
 <img width="909" height="73" alt="image" src="https://github.com/user-attachments/assets/174c1626-a383-4221-94cb-e83d8cad97c3" />
+ ###    remove container 
+ <img width="882" height="179" alt="image" src="https://github.com/user-attachments/assets/88d54991-45a5-4de5-b03c-7589a66614e3" />
 
 
 ---
@@ -116,14 +118,6 @@ sudo ./engine start alpha ../rootfs-alpha /bin/sh
 * Role of `chroot()` in filesystem isolation
 * Low-level process creation using `clone()`
 
----
-
-##  Limitations
-
-* No full supervisor implementation
-* No IPC communication implemented
-* Logging system not implemented
-* State tracking is basic (file-based)
 
 ---
 
