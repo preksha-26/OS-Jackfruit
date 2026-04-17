@@ -89,19 +89,23 @@ sudo ./engine start alpha ../rootfs-alpha /bin/sh
 
 ### 🔹 Container Process Isolation
 
-(Add screenshot of `ps` inside container)
+<img width="776" height="259" alt="WhatsApp Image 2026-04-15 at 11 50 54 PM" src="https://github.com/user-attachments/assets/3277338b-a3dc-4125-af14-f8045dba22a1" />
+
 
 ### 🔹 Hostname Isolation
 
-(Add screenshot of `hostname`)
+<img width="881" height="244" alt="image" src="https://github.com/user-attachments/assets/f0a706b3-9ce9-4b27-86c9-2bda28bf54d7" />
+
 
 ### 🔹 Filesystem Isolation
 
-(Add screenshot of `ls /`)
+<img width="822" height="120" alt="image" src="https://github.com/user-attachments/assets/f8b35fd2-5626-42e2-a324-4cbc849810ce" />
+
 
 ### 🔹 Container List
 
-(Add screenshot of `./engine ps`)
+<img width="909" height="73" alt="image" src="https://github.com/user-attachments/assets/174c1626-a383-4221-94cb-e83d8cad97c3" />
+
 
 ---
 
