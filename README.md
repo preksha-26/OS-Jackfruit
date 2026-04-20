@@ -1,111 +1,189 @@
-# Multi-Container Runtime
+#  OS-Jackfruit: Lightweight Container Runtime in C
 
-A lightweight Linux container runtime in C with a long-running supervisor and a kernel-space memory monitor.
+##  Overview
 
-Read [`project-guide.md`](project-guide.md) for the full project specification.
+OS-Jackfruit is a lightweight container runtime implemented in C using Linux system calls.
+It demonstrates how containers work internally by providing process isolation, filesystem isolation, and basic container lifecycle management.
 
 ---
 
-## Getting Started
+## 🚀 Features Implemented
 
-### 1. Fork the Repository
+* Container creation using `clone()`
+* PID namespace isolation (process isolation)
+* UTS namespace (hostname isolation)
+* Filesystem isolation using `chroot()`
+* Mounting `/proc` for process visibility
+* Execution of commands inside container
+* Basic container lifecycle tracking (`running`, `exited`)
+* Custom command `engine ps` to list container status
 
-1. Go to [github.com/shivangjhalani/OS-Jackfruit](https://github.com/shivangjhalani/OS-Jackfruit)
-2. Click **Fork** (top-right)
-3. Clone your fork:
+---
 
-```bash
-git clone https://github.com/<your-username>/OS-Jackfruit.git
-cd OS-Jackfruit
+## Concepts Used
+
+* Linux Namespaces (`CLONE_NEWPID`, `CLONE_NEWUTS`, `CLONE_NEWNS`)
+* `clone()` system call
+* `chroot()` for filesystem isolation
+* `mount()` for `/proc`
+* Process management
+* File handling for container tracking
+
+---
+
+##  Project Structure
+
+```
+boilerplate/
+│── engine.c          # Main container engine
+│── monitor.c         # Kernel module (optional)
+│── cpu_hog.c         # CPU stress test
+│── memory_hog.c      # Memory stress test
+│── Makefile
+│── rootfs-alpha/     # Container filesystem (created at runtime)
+│── containers.txt    # Stores container states
 ```
 
-### 2. Set Up Your VM
+---
 
-You need an **Ubuntu 22.04 or 24.04** VM with **Secure Boot OFF**. WSL will not work.
+##  Setup Instructions
 
-Install dependencies:
+### 1. Navigate to project
 
 ```bash
-sudo apt update
-sudo apt install -y build-essential linux-headers-$(uname -r)
+cd OS-Jackfruit/boilerplate
 ```
 
-### 3. Run the Environment Check
+---
+
+### 2. Clean previous setup
 
 ```bash
-cd boilerplate
-chmod +x environment-check.sh
-sudo ./environment-check.sh
+sudo umount -l rootfs-alpha/proc 2>/dev/null
+sudo rm -rf rootfs-alpha
 ```
 
-Fix any issues reported before moving on.
+---
 
-### 4. Prepare the Root Filesystem
+### 3. Create root filesystem
 
 ```bash
-mkdir rootfs-base
-wget https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/x86_64/alpine-minirootfs-3.20.3-x86_64.tar.gz
-tar -xzf alpine-minirootfs-3.20.3-x86_64.tar.gz -C rootfs-base
+mkdir rootfs-alpha
 
-# Make one writable copy per container you plan to run
-cp -a ./rootfs-base ./rootfs-alpha
-cp -a ./rootfs-base ./rootfs-beta
+sudo cp -r /bin rootfs-alpha/
+sudo cp -r /lib rootfs-alpha/
+sudo cp -r /lib64 rootfs-alpha/
+sudo cp -r /usr rootfs-alpha/
+
+mkdir rootfs-alpha/proc
+mkdir -p rootfs-alpha/etc
+echo "root:x:0:0:root:/root:/bin/sh" > rootfs-alpha/etc/passwd
 ```
 
-Do not commit `rootfs-base/` or `rootfs-*` directories to your repository.
+---
 
-### 5. Understand the Boilerplate
-
-The `boilerplate/` folder contains starter files:
-
-| File                   | Purpose                                             |
-| ---------------------- | --------------------------------------------------- |
-| `engine.c`             | User-space runtime and supervisor skeleton          |
-| `monitor.c`            | Kernel module skeleton                              |
-| `monitor_ioctl.h`      | Shared ioctl command definitions                    |
-| `Makefile`             | Build targets for both user-space and kernel module |
-| `cpu_hog.c`            | CPU-bound test workload                             |
-| `io_pulse.c`           | I/O-bound test workload                             |
-| `memory_hog.c`         | Memory-consuming test workload                      |
-| `environment-check.sh` | VM environment preflight check                      |
-
-Use these as your starting point. You are free to restructure the repository however you want — the submission requirements are listed in the project guide.
-
-### 6. Build and Verify
+### 4. Compile the project
 
 ```bash
-cd boilerplate
 make
 ```
 
-If this compiles without errors, your environment is ready.
+---
 
-### 7. GitHub Actions Smoke Check
-
-Your fork will inherit a minimal GitHub Actions workflow from this repository.
-
-That workflow only performs CI-safe checks:
-
-- `make -C boilerplate ci`
-- user-space binary compilation (`engine`, `memory_hog`, `cpu_hog`, `io_pulse`)
-- `./boilerplate/engine` with no arguments must print usage and exit with a non-zero status
-
-The CI-safe build command is:
+##  Running the Container
 
 ```bash
-make -C boilerplate ci
+sudo ./engine start alpha ./rootfs-alpha /bin/sh
 ```
-
-This smoke check does not test kernel-module loading, supervisor runtime behavior, or container execution.
 
 ---
 
-## What to Do Next
+##  Inside Container (Test Commands)
 
-Read [`project-guide.md`](project-guide.md) end to end. It contains:
+```bash
+ps
+hostname
+ls /
+ls /proc
+whoami
+```
 
-- The six implementation tasks (multi-container runtime, CLI, logging, kernel monitor, scheduling experiments, cleanup)
-- The engineering analysis you must write
-- The exact submission requirements, including what your `README.md` must contain (screenshots, analysis, design decisions)
+---
 
-Your fork's `README.md` should be replaced with your own project documentation as described in the submission package section of the project guide. (As in get rid of all the above content and replace with your README.md)
+##  Exit Container
+
+```bash
+exit
+```
+
+---
+
+##  Check Container Status
+
+```bash
+./engine ps
+```
+
+---
+
+##  Known Issues
+
+* TTY warning may appear:
+
+  ```
+  Cannot set tty process group
+  ```
+
+  This is expected due to minimal terminal handling.
+
+* Duplicate container entries may appear in `containers.txt`
+  (can be cleared manually).
+
+---
+
+##  Sample Output
+
+```
+Starting container: alpha
+Inside container!
+
+# ps
+PID   CMD
+1     sh
+2     ps
+
+# hostname
+alpha
+```
+
+---
+
+##  Learning Outcomes
+
+* Understanding how containers work internally
+* Hands-on experience with Linux namespaces
+* Working with low-level system calls in C
+* Building a mini Docker-like runtime
+
+---
+
+##  Viva Summary
+
+This project implements a lightweight container runtime using `clone()` and Linux namespaces. It provides isolation of processes, hostname, and filesystem, and demonstrates how containers function at a low level.
+
+---
+
+## Future Improvements
+
+* Add network namespace support
+* Implement resource limits (CPU, memory)
+* Improve container lifecycle management
+* Add logging and monitoring features
+
+---
+
+## Author
+
+* Preksha
+
+---
